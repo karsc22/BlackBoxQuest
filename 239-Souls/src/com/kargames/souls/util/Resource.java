@@ -39,4 +39,8 @@ public class Resource implements Serializable {
 	public void setMax() {
 		value = max;
 	}
+	
+	public String toString() {
+		return (int)value + " / " + (int)max;
+	}
 }

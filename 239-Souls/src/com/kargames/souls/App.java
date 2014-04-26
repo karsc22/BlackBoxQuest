@@ -39,7 +39,7 @@ public class App extends com.badlogic.gdx.Game{
 		screens = new ScreenManager(this);
 		screens.init();
 
-//		setScreen(screens.gameScreen);
-		setScreen(screens.menuScreen); 
+		setScreen(screens.gameScreen);
+//		setScreen(screens.menuScreen); 
 	}
 }

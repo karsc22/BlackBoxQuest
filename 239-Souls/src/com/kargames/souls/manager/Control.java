@@ -26,7 +26,7 @@ public enum Control {
 		defaultKey0 = key0;
 		defaultKey1 = key1;
 	}
-
+	
 	public boolean isPressed() {
 		return Gdx.input.isKeyPressed(key0) || Gdx.input.isKeyPressed(key1);
 	}
