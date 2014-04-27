@@ -61,8 +61,8 @@ public class UpgradeScreen extends Table{
 			addListener(new ClickListener(){
 				@Override
 				public void clicked(InputEvent event, float x, float y) {
-					if (app.screens.gameScreen.numParts >= upgrade.getCost() && !max) {
-						app.screens.gameScreen.numParts -= upgrade.getCost();
+					if (app.screens.gameScreen.numParts.value >= upgrade.getCost() && !max) {
+						app.screens.gameScreen.numParts.value -= upgrade.getCost();
 						upgrade.increment(app);
 					}
 				}
@@ -77,7 +77,7 @@ public class UpgradeScreen extends Table{
 				setDisabled(true);
 			} else {
 				setText("lvl: " + upgrade.level + "\ncost:" + upgrade.getCost());
-				setDisabled(app.screens.gameScreen.numParts < upgrade.getCost());
+				setDisabled(app.screens.gameScreen.numParts.value < upgrade.getCost());
 			}
 			super.act(delta); 
 		}

@@ -2,6 +2,7 @@ package com.kargames.souls.actor;
 
 import com.badlogic.gdx.controllers.Controller;
 import com.badlogic.gdx.controllers.Controllers;
+import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.Body;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
@@ -36,11 +37,13 @@ public class Player extends Image {
 		body.setUserData(this);
 	}
 	
-	
+	public boolean isOutOfWater() {
+		return (body.getPosition().y > -0.5f);
+	}
 	
 	@Override
 	public void act(float delta) {
-		if (body.getPosition().y > -0.5f){
+		if (isOutOfWater()){
 			energy.regen = energy.max / 5f;
 		} else {
 			energy.regen = -1;
@@ -55,23 +58,24 @@ public class Player extends Image {
 			body.applyForceToCenter(0, -grav, true);
 		}
 		
-		Array<Controller> controllers = Controllers.getControllers();
-		if (controllers.size > 0) {
-			Controller c = controllers.get(0);
-			float mod = speed;
-			if (energy.value < 0.1) {
-				mod /= 3;
-			}
-			float h = Axis.getHorizontal();
-			float v = Axis.getVertical();
-//			System.out.println(h + ", " + v);
-			
-			body.applyForceToCenter(h*delta*mod*(10 - grav), v*delta*mod*(10 - grav), true);
+		float mod = speed;
+		if (energy.value < 0.1) {
+			mod /= 3;
+			body.applyForceToCenter(0, 4, true);
 		}
+		float h = Axis.getHorizontal() * delta * mod;
+		float v = Axis.getVertical() * delta * mod;
+		if (MathUtils.random(2f) < Math.abs(h) + Math.abs(v) && body.getPosition().y < 0.5f) {
+			app.screens.gameScreen.makeBubbles(h, v);
+		}
+//			System.out.println(h + ", " + v);
+		
+		body.applyForceToCenter(h*(10 - grav), v*(10 - grav), true);
 		
 		
+		// slow down when in water
 		Vector2 speed = body.getLinearVelocity();
-		float mod = 200;
+		mod = 200;
 		body.applyForceToCenter(-speed.x * delta * mod, -speed.y * delta*mod, true);
 		setPosition(body.getPosition().x - 0.5f, body.getPosition().y - 0.5f);
 	}

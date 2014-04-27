@@ -24,17 +24,22 @@ import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.utils.Array;
+import com.badlogic.gdx.utils.Pool;
+import com.badlogic.gdx.utils.Pools;
 import com.gushikustudios.rube.RubeScene;
 import com.gushikustudios.rube.loader.RubeSceneLoader;
 import com.kargames.souls.App;
+import com.kargames.souls.actor.Bubble;
 import com.kargames.souls.actor.Part;
 import com.kargames.souls.actor.Player;
+import com.kargames.souls.util.Resource;
 import com.kargames.souls.widget.FillTable;
 
 public class GameScreen extends BaseScreen {
 	
 	private static final float WORLD_SIZE = 150;
 
+	ShapeRenderer fullScreenSR;
 	ShapeRenderer sr;
 	public static boolean drawDebug = false;
 	Box2DDebugRenderer debugRenderer;
@@ -56,7 +61,7 @@ public class GameScreen extends BaseScreen {
 	Label partsLabel;
 	Label helpLabel;
 	
-	public int numParts;
+	public Resource numParts;
 	Image image;
 	Image surface;
 	
@@ -66,12 +71,19 @@ public class GameScreen extends BaseScreen {
 	
 	UpgradeScreen upgradeScreen;
 	
+	int numBubbles = 100;
+	Bubble[] bubbles;
+	int currentBubble = 0;
+	
 	public GameScreen(App app) {
 		super(app);
 		toRemove = new Array<Body>();
-		helpStage = 0;
-		numParts = 0;
-		sr = new ShapeRenderer();
+		
+		
+		
+		helpStage = 2;
+		numParts = new Resource(0);
+		fullScreenSR = new ShapeRenderer();
 		upgradeScreen = new UpgradeScreen(app);
 		FillTable hud = new FillTable();
 		hud.top();
@@ -117,6 +129,15 @@ public class GameScreen extends BaseScreen {
 			}
 		});
 		
+		
+
+		bubbles = new Bubble[numBubbles];
+		
+		for (int i = 0; i < numBubbles; i++) {
+			bubbles[i] = new Bubble(app);
+			gameStage.addActor(bubbles[i]);
+		}
+		
 	}
 	
 	
@@ -152,17 +173,19 @@ public class GameScreen extends BaseScreen {
 		
 		for (Body body : parts) {
 			Part p = new Part(app, body, 1);
+			numParts.max++;
 			gameStage.addActor(p);
 		}
-		
 
 		parts = scene.getNamed(Body.class, "bigPart");
 		
 		for (Body body : parts) {
-			Part p = new Part(app, body, 10);
+			Part p = new Part(app, body, 5);
+			numParts.max+= 5;
 			p.setColor(Color.RED);
 			gameStage.addActor(p);
 		}
+		numParts.setMax();
 
 		ContactListener cl = new ContactListener() {
 
@@ -181,7 +204,7 @@ public class GameScreen extends BaseScreen {
 				
 				if (player != null && part != null) {
 					part.remove();
-					numParts+=part.val;
+					numParts.value+=part.val;
 					toRemove.add(part.body);
 					if (helpStage == 0) {
 						helpStage = 1;
@@ -221,7 +244,7 @@ public class GameScreen extends BaseScreen {
 
 		cam.position.set(player.body.getPosition(), 0); 
 		cam.update();
-		sr.begin(ShapeType.Filled);
+		fullScreenSR.begin(ShapeType.Filled);
 		
 		
 		float depth = -player.body.getPosition().y / WORLD_SIZE;
@@ -230,15 +253,17 @@ public class GameScreen extends BaseScreen {
 		float blue = 1;
 		botColor.set(0, 0, blue, 1);
 		topColor.set(0, blue/2f, blue, 1);
-		
-		sr.rect(0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight(), 
-				botColor, botColor, topColor, topColor);
-		sr.end();
+		float w = Gdx.graphics.getWidth();
+		float h = Gdx.graphics.getHeight();
+		fullScreenSR.rect(0, 0, w, h, botColor, botColor, topColor, topColor);
+		fullScreenSR.end();
 		gameStage.getSpriteBatch().begin();
 		image.draw(gameStage.getSpriteBatch(), 1);
 		gameStage.getSpriteBatch().end();
 		gameStage.draw();
-		rayHandler.render();
+		
+		
+		
 //		sr.begin(ShapeType.Filled);
 //		botColor.set(0, 0, blue, 1);
 //		topColor.set(0, blue/2f, blue, 1);
@@ -251,6 +276,18 @@ public class GameScreen extends BaseScreen {
 //		sr.end();
 		
 
+		rayHandler.render();
+
+//		fullScreenSR.begin(ShapeType.Line);
+//		Gdx.gl20.glEnable(GL20.GL_BLEND);
+//		fullScreenSR.setColor(0f, 1, 0, 0.6f);
+//		fullScreenSR.circle(w/2, h/2, h/2, 60);
+//		fullScreenSR.circle(w/2, h/2, h/4, 40);
+//		fullScreenSR.line(w/2, 0, w/2, h);
+//		fullScreenSR.line(0, h/2, w, h/2);
+//		fullScreenSR.line(w/2,  h/2, w/2+h/2*MathUtils.sinDeg(deg), h/2+h/2*MathUtils.cosDeg(deg));
+//		deg++;
+//		fullScreenSR.end();
 
 		if (drawDebug) {
 			debugRenderer.render(world, gameStage.getCamera().combined);
@@ -258,6 +295,7 @@ public class GameScreen extends BaseScreen {
 		super.draw();
 	}
 
+	float deg = 0;
 
 	@Override
 	public void update(float delta) {
@@ -290,7 +328,7 @@ public class GameScreen extends BaseScreen {
 
 		energyLabel.setText("Energy: " + player.energy.toString());
 		depthLabel.setText("Depth: " + (int)y);
-		partsLabel.setText("Parts: " + numParts);
+		partsLabel.setText("Parts: " + numParts.toString());
 		
 
 		if (player.body.getPosition().y > -0.5f && helpStage == 1){
@@ -302,8 +340,19 @@ public class GameScreen extends BaseScreen {
 
 	@Override
 	public void resize(int width, int height) {
-		gameStage.setViewport(32, 18, true);
+		float zoom = 5;
+		gameStage.setViewport(16*zoom, 9*zoom, true);
 		super.resize(width, height);
+	}
+
+
+	public void makeBubbles(float h, float v) {
+		Bubble b = bubbles[currentBubble];
+		currentBubble++;
+		if (currentBubble >= numBubbles) {
+			currentBubble = 0;
+		}
+		b.init(player.body.getPosition(), -h*3, -v*3);
 	}
 
 }
