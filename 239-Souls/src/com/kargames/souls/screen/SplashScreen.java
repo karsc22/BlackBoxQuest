@@ -14,7 +14,7 @@ public class SplashScreen extends BaseScreen {
 	public SplashScreen(final App app) {
 		super(app);
 		FillTable ft = new FillTable();
-		Image splash = new Image(app.textures.libgdx);
+		Image splash = new Image(app.textures.ship);
 		ft.add(splash);
 		stage.addActor(ft);
 		splash.setVisible(false);

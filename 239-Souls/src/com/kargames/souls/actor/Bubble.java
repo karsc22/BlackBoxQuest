@@ -13,7 +13,7 @@ public class Bubble extends Image{
 	float size;
 	public Bubble(App app) {
 		super(app.textures.bubble);
-		size = MathUtils.random(0.2f, 0.35f);
+		size = MathUtils.random(0.15f, 0.28f);
 		setSize(size, size);
 		setOrigin(getWidth()/2, getHeight()/2);
 		this.app = app;

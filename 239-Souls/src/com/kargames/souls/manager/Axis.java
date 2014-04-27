@@ -22,6 +22,15 @@ public class Axis {
 			val++;
 		}
 		
+		val += getControllerValue(axis, flip);
+		if (val > 1) val = 1;
+		if (val < -1) val = -1;
+		
+		return val;
+	}
+	
+	public static float getControllerValue(int axis, boolean flip) {
+		float val = 0;
 		Array<Controller> controllers = Controllers.getControllers();
 		if (controllers.size > 0) {
 			Controller c = controllers.get(0);
@@ -35,7 +44,6 @@ public class Axis {
 		}
 		if (val > 1) val = 1;
 		if (val < -1) val = -1;
-		
 		return val;
 	}
 }
