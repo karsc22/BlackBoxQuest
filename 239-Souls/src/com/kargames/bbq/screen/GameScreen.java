@@ -95,16 +95,13 @@ public class GameScreen extends BaseScreen {
 	
 	Image arrow;
 	
-	
-	// energy < 50% -> "Energy low, return to sub"
-	// below 20 -> ENERGY CRITICAL
-	
 	public GameScreen(App app) {
 		super(app);
 		toRemove = new Array<Body>();
 		arrow = new Image(app.textures.arrow); 
 		arrow.setSize(1, 1);
 		arrow.setOrigin(arrow.getWidth()/2f, arrow.getHeight()/2f);
+		arrow.setVisible(false);
 		floatingText = new Label("", app.styles.labelStyle);
 		stage.addActor(floatingText);
 		helpStage = 0;
@@ -119,17 +116,21 @@ public class GameScreen extends BaseScreen {
 		collectedLabel= new Label("Collected: 0 / 0", app.styles.labelStyle);
 		helpLabel = new Label("Collect airplane parts", app.styles.labelStyle);
 		warningLabel = new Label("Warning: energy low.  Return to sub", app.styles.labelStyle);
-		String text = "WARNING: ENERGY CRITICAL! RETURN TO SUB!";
+		
 		
 		hud.add(energyLabel).row();
 //		hud.add(depthLabel).row();
 		hud.add(partsLabel).row();
-		hud.add(collectedLabel);
+//		hud.add(collectedLabel);
 		stage.addActor(hud);
 		stage.addActor(upgradeScreen);
 		
+		FillTable warningTable = new FillTable();
+		warningTable.add(warningLabel).padBottom(Value.percentHeight(0.1f));
+		stage.addActor(warningTable);
+		
 		FillTable helpTable = new FillTable();
-		helpTable.add(helpLabel).padBottom(Value.percentHeight(0.3f));
+		helpTable.add(helpLabel).padBottom(Value.percentHeight(0.4f));
 		stage.addActor(helpTable);
 		
 
@@ -150,12 +151,12 @@ public class GameScreen extends BaseScreen {
 				if (ch == 'c') {
 					cam.zoom = 1;
 				} 
-				if (ch == ' ') {
-					drawDebug = !drawDebug;
-				}
-				if (ch == 'b') {
-					upgradeScreen.setVisible(!upgradeScreen.isVisible());
-				}
+//				if (ch == ' ') {
+//					drawDebug = !drawDebug;
+//				}
+//				if (ch == 'b') {
+//					upgradeScreen.setVisible(!upgradeScreen.isVisible());
+//				}
 				return super.keyTyped(event, ch);
 			}
 		});
@@ -178,7 +179,7 @@ public class GameScreen extends BaseScreen {
 		debugRenderer = new Box2DDebugRenderer();
 		RubeSceneLoader loader = new RubeSceneLoader();
 
-		RubeScene scene = loader.loadScene(Gdx.files.internal("levels/level1.json"));
+		RubeScene scene = loader.loadScene(Gdx.files.internal("levels/level2.json"));
 //		RubeScene scene = loader.loadScene(Gdx.files.internal("levels/level2.rube"));
 		world = scene.getWorld();
 		Body playerBody = scene.getNamed(Body.class, "playerBody").first();
@@ -217,7 +218,6 @@ public class GameScreen extends BaseScreen {
 		for (Body body : parts) {
 			Part p = new Part(app, body, BIG_PART_VAL);
 			partsCollected.max+= BIG_PART_VAL;
-			p.setColor(Color.RED);
 			gameStage.addActor(p);
 		}
 		
@@ -253,6 +253,7 @@ public class GameScreen extends BaseScreen {
 					partsCollected.value += part.val;
 					toRemove.add(part.body);
 					if (helpStage == 0) {
+						arrow.setVisible(true);
 						helpStage = 1;
 						helpLabel.setText("Return to sub to recharge battery and upgrade ship");
 					}
@@ -268,6 +269,7 @@ public class GameScreen extends BaseScreen {
 					// show victory screen
 					helpLabel.setText("You Win!");
 					helpLabel.setVisible(true);
+					helpLabel.setColor(Color.WHITE);
 				}
 				
 				
@@ -313,13 +315,7 @@ public class GameScreen extends BaseScreen {
 	@Override
 	public void show() {
 		super.show();
-		
 		Gdx.input.setInputProcessor(new InputMultiplexer(stage, gameStage));
-
-		
-
-		
-		
 	}
 	
 	@Override
@@ -330,20 +326,7 @@ public class GameScreen extends BaseScreen {
 		if (cam.zoom < 0.1f) cam.zoom = 0.1f;
 		cam.update();
 		
-		
 		Renderer.renderBackground(-player.body.getPosition().y / WORLD_SIZE);
-//		fullScreenSR.begin(ShapeType.Filled);
-//		float depth = -player.body.getPosition().y / WORLD_SIZE;
-//		if (depth > 1) depth = 1;
-//
-//		float blue = 1;
-//		botColor.set(0, 0, blue, 1);
-//		topColor.set(0, blue/2f, blue, 1);
-//		float w = Gdx.graphics.getWidth();
-//		float h = Gdx.graphics.getHeight();
-//		fullScreenSR.rect(0, 0, w, h, botColor, botColor, topColor, topColor);
-//		fullScreenSR.end();
-		
 		gameStage.getSpriteBatch().begin();
 		image.draw(gameStage.getSpriteBatch(), 1);
 		gameStage.getSpriteBatch().end();
@@ -352,9 +335,12 @@ public class GameScreen extends BaseScreen {
 
 		gameStage.getSpriteBatch().begin();
 		player.draw(gameStage.getSpriteBatch(), 1);
-		arrow.draw(gameStage.getSpriteBatch(), 1);
+		if (arrow.isVisible()) {
+			arrow.draw(gameStage.getSpriteBatch(), 1);
+		}
 		gameStage.getSpriteBatch().end();
 
+		// radar
 //		fullScreenSR.begin(ShapeType.Line);
 //		Gdx.gl20.glEnable(GL20.GL_BLEND);
 //		fullScreenSR.setColor(0f, 1, 0, 0.6f);
@@ -386,15 +372,12 @@ public class GameScreen extends BaseScreen {
 		gameStage.act();
 		rayHandler.setCombinedMatrix(gameStage.getCamera().combined);
 		playerLight.setPosition(player.body.getPosition());
-//		playerLight.setColor(0.5f, 0.7f, 1, 1);
-
 		float y = player.body.getPosition().y;
 		float light = player.light;
 		float depth = -y / (WORLD_SIZE + 50 + light*10);
 		if (depth > 1) depth = 1;
 		if (depth < 0) depth = 0;
 		playerLight.setColor(1, 1, 1, 0.9f-depth);
-//		playerLight.setColor(1, 1, 1, 0.9f);
 		playerLight.setDistance((1-depth) * 25 + 20);
 		rayHandler.update();
 		
@@ -454,6 +437,18 @@ public class GameScreen extends BaseScreen {
 		float angle = temp.angle();
 		arrow.setPosition(player.getX() + 3*MathUtils.cosDeg(angle), player.getY()+ 3*MathUtils.sinDeg(angle));
 		arrow.setRotation(angle-90f);
+		
+		
+		warningLabel.setVisible(false);
+		if (player.energy.getRatio() < 0.5f && !player.isTouchingSub) {
+			warningLabel.setVisible(true);
+			warningLabel.setText("Warning: energy low.  Return to sub");
+			warningLabel.setColor(Color.YELLOW);
+			if (player.energy.getRatio() < 0.2f) {
+				warningLabel.setText("WARNING: ENERGY CRITICAL! RETURN TO SUB!");
+				warningLabel.setColor(Color.RED);
+			}
+		}
 		
 	}
 	

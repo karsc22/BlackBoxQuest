@@ -10,7 +10,7 @@ public class Part extends Image{
 	public float val;
 	public Body body;
 	public Part(App app, Body body, float val) {
-		super(app.textures.part);
+		super(val == 1 ? app.textures.part : app.textures.bigPart); 
 		this.body = body;
 		setSize(size, size);
 		this.val = val;
