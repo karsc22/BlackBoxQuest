@@ -7883,8 +7883,8 @@
         "name" : "playerBody",
         "position" : 
         {
-          "x" : -16.64831733703613,
-          "y" : -30.14327239990234
+          "x" : -46.36323547363281,
+          "y" : -142.7898254394531
         },
         "type" : "dynamic"
       },
@@ -9874,8 +9874,6 @@
           
           {
             "density" : 1,
-            "filter-categoryBits" : 2,
-            "filter-groupIndex" : 2,
             "friction" : 0.2,
             "id" : 227,
             "name" : "fixture5",

@@ -1,6 +1,6 @@
 package com.kargames.souls.client;
 
-import com.kargames.souls.Souls;
+import com.kargames.bbq.Souls;
 import com.badlogic.gdx.ApplicationListener;
 import com.badlogic.gdx.backends.gwt.GwtApplication;
 import com.badlogic.gdx.backends.gwt.GwtApplicationConfiguration;

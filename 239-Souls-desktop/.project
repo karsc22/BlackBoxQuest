@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <projectDescription>
-	<name>239-Souls-desktop</name>
+	<name>239-souls-desktop</name>
 	<comment></comment>
 	<projects>
 	</projects>
@@ -18,7 +18,17 @@
 		<link>
 			<name>assets</name>
 			<type>2</type>
-			<locationURI>PARENT-1-PROJECT_LOC/239-Souls-android/assets</locationURI>
+			<location>E:/workspace/LD29/239-Souls/239-Souls-android/assets</location>
 		</link>
 	</linkedResources>
+	<variableList>
+		<variable>
+			<name>copy_PARENT</name>
+			<value>$%7BPARENT-1-PROJECT_LOC%7D/LD29/239-Souls</value>
+		</variable>
+		<variable>
+			<name>copy_PARENT1</name>
+			<value>$%7Bcopy_PARENT%7D/LD29/239-Souls</value>
+		</variable>
+	</variableList>
 </projectDescription>
